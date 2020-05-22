@@ -26,5 +26,14 @@ app.sendQuickReplies({
     "title": "How likely are you to recommend Yellow Messenger to your colleague or business relation?",
     "rating": true,
     options
-},{hideInput:true}).then(resolve());
+},{hideInput:true})
+.then(resolve());
+```
+
+### Webview
+```js
+app.sendWebView('', 'https://yellow.chat/clixcapital', 350, { hideInput: true })
+.then(() => {
+  return resolve();
+})
 ```
