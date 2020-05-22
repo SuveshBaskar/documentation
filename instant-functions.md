@@ -160,3 +160,59 @@ return new Promise(async (resolve) => {
     }
 });
 ```
+
+
+### Extract details for a Sentence
+```js
+let data = "I need 5 bananas and 2kg of oranges, also add 500gms of Banana too";
+const fruitPatternCollection = {
+    "Banana": /\b(bananas|banana)\b/gi,
+    "Orange": /\b(oranges|orange)\b/gi, 
+}
+const unitPatternCollection = {
+    "KGs": /kg/gi,
+    "Grams": /grams|gram|gms|gm|grm/gi,
+}
+const itemsArray = Object.keys(fruitPatternCollection)
+const unitsArray = Object.keys(unitPatternCollection)
+const productsArray = [
+    ...Object.keys(fruitPatternCollection),
+    ...Object.keys(unitPatternCollection),
+]
+const numberRegex = /[-]?[0-9]+[,.]?[0-9]*([\/][0-9]+[,.]?[0-9]*)*/g
+const numberRegexString = "[-]?[0-9]+[,.]?[0-9]*([\/][0-9]+[,.]?[0-9]*)*"
+const removePattern = new RegExp("^((?!("+ productsArray.join("|")+ "|" + numberRegexString +")).)*$","gmi");
+const replaceInput = (data, object) => {
+    for (let key in object) {
+        data = data.replace(object[key], " " + key + " ").trim().replace(/\s{2,}/g," ")
+    }
+    return data;
+}
+data = replaceInput(data, fruitPatternCollection)
+data = replaceInput(data, unitPatternCollection)
+data = data
+        .replace(/\s+/g,"\n")
+        .replace(removePattern,"")
+        .replace(/\n/g," ")
+        .replace(/\s{2,}/g," ")
+        .trim()
+        .replace(new RegExp("("+itemsArray.join("|")+")","gi"),"$1 $#7884")
+        .split("$#7884")
+        .filter(Boolean)
+        .map(value => value.trim());
+data = data
+        .map(value => {
+            let result = {};
+            result["product"] = value.match(new RegExp(itemsArray.join("|")))
+                                ? value.match(new RegExp(itemsArray.join("|")))[0]
+                                : null
+            result["unit"] = value.match(new RegExp(unitsArray.join("|")))
+                                ? value.match(new RegExp(unitsArray.join("|")))[0]
+                                : null
+            result["quantity"] = value.match(numberRegex)
+                                    ? value.match(numberRegex)[0]
+                                    : null
+            return result;
+        })
+console.log(data);
+```
